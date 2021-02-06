@@ -33,6 +33,7 @@ namespace obDisplay{
             h = parseInt(message[2]);
             y = Math.trunc(id * (5 / w)) * 5;
             x = (id - y * (w / 5)) * 5;
+            basic.pause(100);
             radio.sendString("RESPONSE:" + id.toString());
         }
         let cs = 0
@@ -68,9 +69,10 @@ namespace obDisplay{
             basic.pause(100);
         }
     }
-    export function initSlawe(){
+    export function initSlave(){
         radio.setGroup(4);
         getID();
+        basic.clearScreen();
     }
     export function drawDisplay(){
         //Adat a screen változóban
