@@ -21,16 +21,24 @@ namespace obDisplay{
     let screen: OBScreen;
     let x: number;
     let y: number;
+    let w: number;
+    let h: number;
     radio.onReceivedString(function (receivedString: string) {
-        led.plotBrightness(2, 2, 255)
+        let message = receivedString.split(":");
+        if(message[0] == "INIT"){
+            w = parseInt(message[1]);
+            h = parseInt(message[2]);
+            y = Math.trunc(id * (5 / w)) * 5;
+            x = (id - y * (w / 5)) * 5;
+        }
     })
     export function initMaster(){
         radio.setGroup(4);
-        radio.sendString("Hello");
+        radio.sendString("INIT:150:100");
     }
     export function initSlawe(){
         radio.setGroup(4);
-/*        id = 0
+        id = 0
         basic.showNumber(id);
         while(true){
             control.waitMicros(1000);
@@ -39,10 +47,10 @@ namespace obDisplay{
                 basic.showNumber(id);
             }
             if(input.buttonIsPressed(Button.B)){
-                let rows = screen.width / 5;
+                // let rows = screen.width / 5;
                 return;
             }
-        }*/
+        }
     }
     export function drawDisplay(){
         //Adat a screen változóban
