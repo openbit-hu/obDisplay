@@ -28,6 +28,7 @@ namespace obDisplay{
     radio.onReceivedString(function (receivedString: string) {
         let message = receivedString.split(":");
         if(message[0] == "INIT"){
+            led.plot(0, 1);
             w = parseInt(message[1]);
             h = parseInt(message[2]);
             y = Math.trunc(id * (5 / w)) * 5;
@@ -36,6 +37,7 @@ namespace obDisplay{
         }
         let cs = 0
         if(message[0] == "RESPONSE"){
+            led.plot(1, 1);
             cs += parseInt(message[1]);
             if(checkSum == cs){
                 ready = true;
@@ -45,18 +47,23 @@ namespace obDisplay{
             return
         }
         if(message[0] == "CMD"){
+            led.plot(2, 1);
             basic.showString(message[1]);
         }
     })
     export function initMaster(w: number, h: number){
         ready = false;
         getID();
+        basic.clearScreen();
+        led.plot(0, 0)
         checkSum = 0
         for(let i = 1; i < w * h / 25;  i++){
             checkSum += i;
         }
+        led.plot(1, 0)
         radio.setGroup(4);
         radio.sendString("INIT:" + w.toString() + ":" + h.toString());
+        led.plot(2, 0)
         while(!ready){
             basic.pause(100);
         }
