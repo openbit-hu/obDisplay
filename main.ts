@@ -23,6 +23,8 @@ namespace obDisplay{
     let y: number;
     let w: number;
     let h: number;
+    let checkSum: number;
+    let ready: boolean;
     radio.onReceivedString(function (receivedString: string) {
         let message = receivedString.split(":");
         if(message[0] == "INIT"){
@@ -30,15 +32,46 @@ namespace obDisplay{
             h = parseInt(message[2]);
             y = Math.trunc(id * (5 / w)) * 5;
             x = (id - y * (w / 5)) * 5;
-            radio.sendString("Response:" + id);
+            radio.sendString("RESPONSE:" + id.toString());
         }
+        let cs = 0
+        if(message[0] == "RESPONSE"){
+            cs += parseInt(message[1]);
+            if(checkSum == cs){
+                ready = true;
+            }
+        }
+
     })
-    export function initMaster(){
+    export function initMaster(w: number, h: number){
+        ready = false;
+        getID();
+        checkSum = 0
+        for(let i = 1; i < w * h / 25;  i++){
+            checkSum += i;
+        }
         radio.setGroup(4);
-        radio.sendString("INIT:150:100");
+        radio.sendString("INIT:" + w.toString() + ":" + h.toString());
+        while(!ready){
+            basic.pause(100);
+        }
     }
     export function initSlawe(){
         radio.setGroup(4);
+        getID();
+    }
+    export function drawDisplay(){
+        //Adat a screen változóban
+        for(let i = screen.x; i < screen.x + screen.width; i++){
+            for(let j = screen.y; j < screen.y + screen.height; j++){
+                let index = j * screen.width + i;
+                let ch = screen.data.charAt(index);
+                let brightness = parseInt(ch) * 16;
+                led.plotBrightness(i - x, j - y, brightness);
+            }
+        }
+    }
+    function getID(){
         id = 0
         basic.showNumber(id);
         while(true){
@@ -51,17 +84,6 @@ namespace obDisplay{
                 // let rows = screen.width / 5;
                 return;
             }
-        }
-    }
-    export function drawDisplay(){
-        //Adat a screen változóban
-        for(let i = screen.x; i < screen.x + screen.width; i++){
-            for(let j = screen.y; j < screen.y + screen.height; j++){
-                let index = j * screen.width + i;
-                let ch = screen.data.charAt(index);
-                let brightness = parseInt(ch) * 16;
-                led.plotBrightness(i - x, j - y, brightness);
-            }
-        }
+        }        
     }
 }
