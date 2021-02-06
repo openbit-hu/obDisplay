@@ -30,6 +30,7 @@ namespace obDisplay{
             h = parseInt(message[2]);
             y = Math.trunc(id * (5 / w)) * 5;
             x = (id - y * (w / 5)) * 5;
+            radio.sendString("Response:" + id);
         }
     })
     export function initMaster(){
