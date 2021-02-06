@@ -30,7 +30,7 @@ namespace obDisplay{
     }
     export function initSlawe(){
         radio.setGroup(4);
-        id = 0
+/*        id = 0
         basic.showNumber(id);
         while(true){
             control.waitMicros(1000);
@@ -42,7 +42,7 @@ namespace obDisplay{
                 let rows = screen.width / 5;
                 return;
             }
-        }
+        }*/
     }
     export function drawDisplay(){
         //Adat a screen változóban
