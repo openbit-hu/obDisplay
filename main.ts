@@ -41,7 +41,12 @@ namespace obDisplay{
                 ready = true;
             }
         }
-
+        if(!ready){
+            return
+        }
+        if(message[0] == "CMD"){
+            basic.showString(message[1]);
+        }
     })
     export function initMaster(w: number, h: number){
         ready = false;
@@ -70,6 +75,9 @@ namespace obDisplay{
                 led.plotBrightness(i - x, j - y, brightness);
             }
         }
+    }
+    export function isReady(): boolean{
+        return ready;
     }
     function getID(){
         id = 0
