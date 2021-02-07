@@ -68,20 +68,29 @@ namespace obDisplay{
         let w=screen.width
         let h=screen.height
         let maxID=Math.trunc(w*h/25)
-        for(let id=0;id<maxID;id++){
+        for(let n=0;n<maxID;n++){
             let data=""
-            y = Math.trunc(id * (5 / w)) * 5
-            x = (id - y * (w / 5)) * 5
-            for(let row=0;row<5;row++){
-                let line=0
-                for(let column=0;column<5;column++){
-                    // black & white projection
-                    let pixel=(screen.data[x+column][y+row]>0)?1:0
-                    line+=pixel<<column
+            y = Math.trunc(n * (5 / w)) * 5
+            x = (n - y * (w / 5)) * 5
+            if(n==id){
+                for(let row=0;row<5;row++){
+                    for(let column=0;column<5;column++){
+                        led.plotBrightness(column,row,screen.data[x+column][y+row])
+                    }
                 }
-                data+=to32(line)
             }
-            radio.sendString("D:"+id.toString()+":"+data)
+            else{
+                for(let row=0;row<5;row++){
+                    let line=0
+                    for(let column=0;column<5;column++){
+                        // black & white projection
+                        let pixel=(screen.data[x+column][y+row]>0)?1:0
+                        line+=pixel<<column
+                    }
+                    data+=to32(line)
+                }
+                radio.sendString("D:"+id.toString()+":"+data)
+            }
         }
     }
     //% blockId="obDisplay_initMaster"
