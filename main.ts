@@ -1,21 +1,40 @@
 class OBImage{
-    data: string;
     x: number;
     y: number
     width: number;
     height: number;
+    size: number;
+    data: number[][];
     constructor(x: number, y: number, w: number, h: number){
         this.x = x;
         this.y = y;
         this.width = w;
         this.height = h;
+        this.size = w*h;
+        for(let i=0;i<w;i++){
+            this.data[i]=[]
+            for(let j=0;j<h;j++){
+                this.data[i][j]=0
+            }
+        }
     }
 }
+
 class OBScreen extends OBImage {
     constructor(w: number, h: number){
         super(0, 0, w, h);
     }
+    setLine(id:number,row:number,line:number,doPlot:boolean){
+        let y=Math.trunc(id/this.width)
+        let x=id-y*this.width
+        for(let column=0;column<5;column++){
+            line=line>>1
+            this.data[x+column][y+row]=line&1*255
+            if(doPlot)led.plot(column, row)
+        }
+    }
 }
+
 namespace obDisplay{
     let id: number;
     let screen: OBScreen;
@@ -23,70 +42,43 @@ namespace obDisplay{
     let y: number;
     let w: number;
     let h: number;
-    let checkSum: number;
-    let ready: boolean;
     radio.onReceivedString(function (receivedString: string) {
         let message = receivedString.split(":");
         if(message[0] == "INIT"){
-            led.plot(0, 1);
             w = parseInt(message[1]);
             h = parseInt(message[2]);
             y = Math.trunc(id * (5 / w)) * 5;
             x = (id - y * (w / 5)) * 5;
-            basic.pause(100);
-            radio.sendString("RESPONSE:" + id.toString());
         }
-        let cs = 0
-        if(message[0] == "RESPONSE"){
-            led.plot(1, 1);
-            cs += parseInt(message[1]);
-            if(checkSum == cs){
-                ready = true;
-            }
-        }
-        if(!ready){
-            return
-        }
-        if(message[0] == "CMD"){
-            led.plot(2, 1);
-            basic.showString(message[1]);
+        if(message[0] == "D"){
+            decode(parseInt(message[1]),message[2])
         }
     })
+    function decode(displayID:number, str:string){
+        let index=0;
+        while(index<5){
+            let v=parse32(str.charCodeAt(index))
+            screen.setLine(id,index,v,(displayID==id))
+        }
+    }
+    function refresh(){
+        let data=""
+        radio.sendString("")
+    }
     export function initMaster(w: number, h: number){
-        ready = false;
         getID();
         basic.clearScreen();
-        led.plot(0, 0)
-        checkSum = 0
-        for(let i = 1; i < w * h / 25;  i++){
-            checkSum += i;
-        }
-        led.plot(1, 0)
         radio.setGroup(4);
+        screen=new OBScreen(w,h);
         radio.sendString("INIT:" + w.toString() + ":" + h.toString());
-        led.plot(2, 0)
-        while(!ready){
-            basic.pause(100);
-        }
     }
     export function initSlave(){
         radio.setGroup(4);
         getID();
         basic.clearScreen();
     }
-    export function drawDisplay(){
-        //Adat a screen változóban
-        for(let i = screen.x; i < screen.x + screen.width; i++){
-            for(let j = screen.y; j < screen.y + screen.height; j++){
-                let index = j * screen.width + i;
-                let ch = screen.data.charAt(index);
-                let brightness = parseInt(ch) * 16;
-                led.plotBrightness(i - x, j - y, brightness);
-            }
-        }
-    }
-    export function isReady(): boolean{
-        return ready;
+    export function plot(x:number, y:number, brightness:number){
+        screen.data[x][y]=brightness;
     }
     function getID(){
         id = 0
@@ -98,9 +90,42 @@ namespace obDisplay{
                 basic.showNumber(id);
             }
             if(input.buttonIsPressed(Button.B)){
-                // let rows = screen.width / 5;
                 return;
             }
         }        
     }
+    let chrs=['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v']
+    function to32(a1:number,a2:number,a3:number,a4:number):string{
+        let a=a1
+        a+=a2<<2
+        a+=a3<<4
+        a+=a4<<8
+        if(a<10)return a.toString()
+        return chrs[a-10]
+    }
+    function parse32(c0: number): number {
+        if ((c0 > 47) && (c0 < 58)) return c0 - 48
+        return c0 - 87
+    }
 }
+/*
+class Index2D{
+    x:number
+    y:number
+    w:number
+    h:number
+    constructor(offset:number,w:number,h:number){
+        this.y=Math.trunc(offset/w)
+        this.x=offset-this.y*w
+        this.w=w
+        this.h=h
+    }
+    increas():boolean{
+        this.x++;
+        if(this.x>=this.w){
+            this.x=0
+            this.y++
+        }
+        return (this.y>=this.h)
+    }
+}*/
