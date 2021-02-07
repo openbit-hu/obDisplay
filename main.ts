@@ -3,14 +3,12 @@ class OBImage{
     y: number
     width: number;
     height: number;
-    size: number;
     data: number[][];
     constructor(x: number, y: number, w: number, h: number){
         this.x = x;
         this.y = y;
         this.width = w;
         this.height = h;
-        this.size = w*h;
         for(let i=0;i<w;i++){
             this.data[i]=[]
             for(let j=0;j<h;j++){
@@ -22,7 +20,7 @@ class OBImage{
 
 class OBScreen extends OBImage {
     constructor(w: number, h: number){
-        super(0, 0, w, h);
+        super(0, 0, w, h)
     }
     setLine(id:number,row:number,line:number,doPlot:boolean){
         let y=Math.trunc(id/this.width)
@@ -35,71 +33,90 @@ class OBScreen extends OBImage {
     }
 }
 
+//% color=#008060 weight=100 icon="\uf84c" block="obDisplay"
 namespace obDisplay{
-    let id: number;
-    let screen: OBScreen;
-    let x: number;
-    let y: number;
-    let w: number;
-    let h: number;
+    let id: number
+    let x: number
+    let y: number
+    let screen: OBScreen
+    let isSlave: boolean
     radio.onReceivedString(function (receivedString: string) {
-        let message = receivedString.split(":");
+        let message = receivedString.split(":")
         if(message[0] == "INIT"){
-            w = parseInt(message[1]);
-            h = parseInt(message[2]);
-            y = Math.trunc(id * (5 / w)) * 5;
-            x = (id - y * (w / 5)) * 5;
+            let w = parseInt(message[1])
+            let h = parseInt(message[2])
+            y = Math.trunc(id * (5 / w)) * 5
+            x = (id - y * (w / 5)) * 5
+            screen=new OBScreen(w,h)
         }
         if(message[0] == "D"){
-            decode(parseInt(message[1]),message[2])
+            if(screen)decode(parseInt(message[1]),message[2])
         }
     })
     function decode(displayID:number, str:string){
-        let index=0;
-        while(index<5){
-            let v=parse32(str.charCodeAt(index))
-            screen.setLine(id,index,v,(displayID==id))
+        let row=0
+        while(row<5){
+            let line=parse32(str.charCodeAt(row))
+            screen.setLine(displayID,row++,line,(displayID==id))
         }
     }
     function refresh(){
-        let data=""
-        radio.sendString("")
+        let w=screen.width
+        let h=screen.height
+        let maxID=Math.trunc(w*h/25)
+        for(let id=0;id<maxID;id++){
+            let data=""
+            y = Math.trunc(id * (5 / w)) * 5
+            x = (id - y * (w / 5)) * 5
+            for(let row=0;row<5;row++){
+                let line=0
+                for(let column=0;column<5;column++){
+                    // black & white projection
+                    let pixel=(screen.data[x+column][y+row]>0)?1:0
+                    line+=pixel<<column
+                }
+                data+=to32(line)
+            }
+            radio.sendString("D:"+id.toString()+":"+data)
+        }
     }
+    //% blockId="obDisplay_initMaster"
+    //% block="initialize display on the master bit $width $height"
     export function initMaster(w: number, h: number){
-        getID();
-        basic.clearScreen();
-        radio.setGroup(4);
-        screen=new OBScreen(w,h);
-        radio.sendString("INIT:" + w.toString() + ":" + h.toString());
+        isSlave=false
+        getID()
+        screen=new OBScreen(w,h)
+        radio.sendString("INIT:" + w.toString() + ":" + h.toString())
     }
+    //% blockId="obDisplay_initSlave"
+    //% block="initialize display on a slave bit"
     export function initSlave(){
-        radio.setGroup(4);
-        getID();
-        basic.clearScreen();
+        isSlave=true
+        getID()
     }
+    //% blockId="obDisplay_plot"
+    //% block="plot on the display $x $y $brightness"
     export function plot(x:number, y:number, brightness:number){
-        screen.data[x][y]=brightness;
+        screen.data[x][y]=brightness
     }
     function getID(){
         id = 0
-        basic.showNumber(id);
+        basic.showNumber(id)
         while(true){
-            control.waitMicros(1000);
+            control.waitMicros(1000)
             if(input.buttonIsPressed(Button.A)){
-                id += 1;
-                basic.showNumber(id);
+                id += 1
+                basic.showNumber(id)
             }
             if(input.buttonIsPressed(Button.B)){
-                return;
+                basic.clearScreen()
+                radio.setGroup(4)
+                return
             }
         }        
     }
     let chrs=['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v']
-    function to32(a1:number,a2:number,a3:number,a4:number):string{
-        let a=a1
-        a+=a2<<2
-        a+=a3<<4
-        a+=a4<<8
+    function to32(a:number):string{
         if(a<10)return a.toString()
         return chrs[a-10]
     }
