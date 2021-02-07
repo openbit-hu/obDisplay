@@ -60,7 +60,10 @@ namespace obDisplay{
             screen.setLine(displayID,row++,line,(displayID==id))
         }
     }
-    function refresh(){
+    //% blockId="obDisplay_refresh"
+    //% block="draws the actual data on each micro:bit of the display"
+    export function refresh(){
+        if(isSlave)return
         let w=screen.width
         let h=screen.height
         let maxID=Math.trunc(w*h/25)
