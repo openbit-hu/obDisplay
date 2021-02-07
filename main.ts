@@ -9,6 +9,7 @@ class OBImage{
         this.y = y;
         this.width = w;
         this.height = h;
+        this.data=[];
         for(let i=0;i<w;i++){
             this.data[i]=[]
             for(let j=0;j<h;j++){
