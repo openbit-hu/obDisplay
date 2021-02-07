@@ -90,7 +90,6 @@ namespace obDisplay{
         isSlave=false
         getID()
         screen=new OBScreen(w,h)
-        led.plot(0,0)
         radio.sendString("INIT:" + w.toString() + ":" + h.toString())
     }
     //% blockId="obDisplay_initSlave"
@@ -102,7 +101,6 @@ namespace obDisplay{
     //% blockId="obDisplay_plot"
     //% block="plot on the display $x $y $brightness"
     export function plot(x:number, y:number, brightness:number){
-        led.plot(1,0)
         screen.data[x][y]=brightness
     }
     function getID(){
