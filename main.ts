@@ -24,12 +24,13 @@ class OBScreen extends OBImage {
         super(0, 0, w, h)
     }
     setLine(id:number,row:number,line:number,doPlot:boolean){
-        let y=Math.trunc(id/this.width)
-        let x=id-y*this.width
+        let y=Math.trunc(id*5/this.width)
+        let x=id*5-y*this.width
         for(let column=0;column<5;column++){
+            let b=(line&0x01)*255
+            this.data[x+column][y+row]=b
+            if(doPlot)led.plotBrightness(column, row, b)
             line=line>>1
-            this.data[x+column][y+row]=line&1*255
-            if(doPlot)led.plot(column, row)
         }
     }
 }
@@ -58,6 +59,7 @@ namespace obDisplay{
         let row=0
         while(row<5){
             let line=parse32(str.charCodeAt(row))
+//            serial.writeLine("CH:"+str.charAt(row)+":"+str.charCodeAt(row)+":"+line.toString())
             screen.setLine(displayID,row++,line,(displayID==id))
         }
     }
@@ -89,7 +91,7 @@ namespace obDisplay{
                     }
                     data+=to32(line)
                 }
-                radio.sendString("D:"+id.toString()+":"+data)
+                radio.sendString("D:"+n.toString()+":"+data)
             }
         }
     }
@@ -101,11 +103,25 @@ namespace obDisplay{
         screen=new OBScreen(w,h)
         radio.sendString("INIT:" + w.toString() + ":" + h.toString())
     }
+    //% blockId="obDisplay_initMasterWithID"
+    //% block="initialize display on the master bit $width $height with $displayID"
+    export function initMasterWithID(w: number, h: number, displayID: number){
+        isSlave=false
+        id=displayID
+        screen=new OBScreen(w,h)
+        radio.sendString("INIT:" + w.toString() + ":" + h.toString())
+    }
     //% blockId="obDisplay_initSlave"
     //% block="initialize display on a slave bit"
     export function initSlave(){
         isSlave=true
         getID()
+    }
+    //% blockId="obDisplay_initSlaveWithID"
+    //% block="initialize display on a slave bit with $displayID"
+    export function initSlaveWithID(displayID: number){
+        isSlave=false
+        id=displayID
     }
     //% blockId="obDisplay_plot"
     //% block="plot on the display $x $y $brightness"
