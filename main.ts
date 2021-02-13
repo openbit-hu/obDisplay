@@ -109,6 +109,7 @@ namespace obDisplay{
         isSlave=false
         id=displayID
         screen=new OBScreen(w,h)
+        radio.setGroup(4)
         radio.sendString("INIT:" + w.toString() + ":" + h.toString())
     }
     //% blockId="obDisplay_initSlave"
