@@ -120,6 +120,7 @@ namespace obDisplay{
     //% blockId="obDisplay_initSlaveWithID"
     //% block="initialize display on a slave bit with $displayID"
     export function initSlaveWithID(displayID: number){
+        radio.setGroup(4)
         isSlave=true
         id=displayID
     }
