@@ -72,8 +72,8 @@ namespace obDisplay{
         let maxID=Math.trunc(w*h/25)
         for(let n=0;n<maxID;n++){
             let data=""
-            y = Math.trunc(n * (5 / w)) * 5
-            x = (n - y * (w / 5)) * 5
+            y = Math.trunc(n * 5 / w) * 5
+            x = (n - y * w / 25) * 5
             if(n==id){
                 for(let row=0;row<5;row++){
                     for(let column=0;column<5;column++){
@@ -91,6 +91,7 @@ namespace obDisplay{
                     }
                     data+=to32(line)
                 }
+                serial.writeLine("D:"+n.toString()+":"+data)
                 radio.sendString("D:"+n.toString()+":"+data)
             }
         }
