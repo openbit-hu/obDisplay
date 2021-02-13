@@ -120,13 +120,24 @@ namespace obDisplay{
     //% blockId="obDisplay_initSlaveWithID"
     //% block="initialize display on a slave bit with $displayID"
     export function initSlaveWithID(displayID: number){
-        isSlave=false
+        isSlave=true
         id=displayID
     }
     //% blockId="obDisplay_plot"
-    //% block="plot on the display $x $y $brightness"
+    //% block="plot on the display at $x $y with $brightness"
     export function plot(x:number, y:number, brightness:number){
         screen.data[x][y]=brightness
+    }
+    //% blockId="obDisplay_drawImage"
+    //% block="draws $img on the display at $x $y starting point"
+    export function drawImage(x:number, y:number, img:OBImage){
+        for(let i=0;i<img.width;i++){
+            for(let j=0;j<img.height;j++){
+                if((x+i)>=screen.width)continue;
+                if((y+j)>=screen.height)continue;
+                screen.data[x+i][y+j]=img.data[i][j]
+            }
+        }
     }
     function getID(){
         id = 0
