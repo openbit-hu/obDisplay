@@ -1,3 +1,14 @@
+enum OBBrightness{
+    //% blockId="HI" block="high"
+    HI = 255,
+    //% blockId="MID" block="middle"
+    MID = 63,
+    //% blockId="LO" block="low"
+    LO = 15,
+    //% blockId="OFF" block="off"
+    OFF = 0
+}
+
 class OBImage{
     x: number;
     y: number
@@ -33,6 +44,24 @@ class OBScreen extends OBImage {
             line=line>>1
         }
     }
+    setLineGS(id:number,row:number,lineHI:number,lineLO:number,doPlot:boolean){
+        let y=Math.trunc(id*5/this.width)
+        let x=id*5-y*this.width
+        for(let column=0;column<5;column++){
+            let hi=(lineHI&0x01)*255
+            let lo=(lineLO&0x01)*255
+            let b=0
+            if(hi&&lo)b=255
+            else{
+                if(hi)b=63
+                if(lo)b=15
+            }
+            this.data[x+column][y+row]=b
+            if(doPlot)led.plotBrightness(column, row, b)
+            lineHI=lineHI>>1
+            lineLO=lineLO>>1
+        }
+    }
 }
 
 //% color=#008060 weight=100 icon="\uf00a" block="obDisplay"
@@ -54,13 +83,23 @@ namespace obDisplay{
         if(message[0] == "D"){
             if(screen)decode(parseInt(message[1]),message[2])
         }
+        if(message[0] == "S"){
+            if(screen)decodeGS(parseInt(message[1]),message[2])
+        }
     })
     function decode(displayID:number, str:string){
         let row=0
         while(row<5){
             let line=parse32(str.charCodeAt(row))
-//            serial.writeLine("CH:"+str.charAt(row)+":"+str.charCodeAt(row)+":"+line.toString())
             screen.setLine(displayID,row++,line,(displayID==id))
+        }
+    }
+    function decodeGS(displayID:number, str:string){
+        let row=0
+        while(row<5){
+            let lineHI=parse32(str.charCodeAt(2*row))
+            let lineLO=parse32(str.charCodeAt(2*row+1))
+            screen.setLineGS(displayID,row++,lineHI,lineLO,(displayID==id))
         }
     }
     //% blockId="obDisplay_refresh"
@@ -91,8 +130,48 @@ namespace obDisplay{
                     }
                     data+=to32(line)
                 }
-                serial.writeLine("D:"+n.toString()+":"+data)
                 radio.sendString("D:"+n.toString()+":"+data)
+            }
+        }
+    }
+    //% blockId="obDisplay_refreshGS"
+    //% block="draws the actual data on each micro:bit of the display"
+    export function refreshGS(){
+        if(isSlave)return
+        let w=screen.width
+        let h=screen.height
+        let maxID=Math.trunc(w*h/25)
+        for(let n=0;n<maxID;n++){
+            let data=""
+            y = Math.trunc(n * 5 / w) * 5
+            x = (n - y * w / 25) * 5
+            if(n==id){
+                for(let row=0;row<5;row++){
+                    for(let column=0;column<5;column++){
+                        led.plotBrightness(column,row,screen.data[x+column][y+row])
+                    }
+                }
+            }
+            else{
+                for(let row=0;row<5;row++){
+                    let line=0
+                    for(let column=0;column<5;column++){
+                        // HI bit
+                        let pixel=(screen.data[x+column][y+row]>=OBBrightness.MID)?1:0
+                        line+=pixel<<column
+                    }
+                    data+=to32(line)
+                    line=0
+                    for(let column=0;column<5;column++){
+                        // LO bit
+                        let b=screen.data[x+column][y+row]
+                        let pixel=((b==OBBrightness.LO)||(b==OBBrightness.HI))?1:0
+                        line+=pixel<<column
+                    }
+                    data+=to32(line)
+                }
+//                serial.writeLine("S:"+n.toString()+":"+data)
+                radio.sendString("S:"+n.toString()+":"+data)
             }
         }
     }
@@ -128,7 +207,7 @@ namespace obDisplay{
     }
     //% blockId="obDisplay_plot"
     //% block="plot on the display at $x $y with $brightness"
-    export function plot(x:number, y:number, brightness:number){
+    export function plot(x:number, y:number, brightness:OBBrightness){
         screen.data[x][y]=brightness
     }
     //% blockId="obDisplay_drawImage"
