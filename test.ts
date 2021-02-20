@@ -23,14 +23,23 @@ basic.forever(function () {
     let dirX=1
     let y=2
     let dirY=1
+    let b=1
+    let dirB=1
     while(true){
         if(running){
-            obDisplay.plot(x,y,0)
+            obDisplay.plot(x,y,OBBrightness.OFF)
             x+=dirX
             y+=dirY
+            b+=dirB
+            let paramB=OBBrightness.LO
+            switch(b){
+                case 1 : paramB=OBBrightness.MID; break
+                case 2 : paramB=OBBrightness.HI; break
+            }
             if((x==0)||(x==4))dirX=-dirX
             if((y==0)||(y==9))dirY=-dirY
-            obDisplay.plot(x,y,255)
+            if((b==0)||(b==2))dirB=-dirB
+            obDisplay.plot(x,y,paramB)
             obDisplay.refresh()
         }
         basic.pause(100)

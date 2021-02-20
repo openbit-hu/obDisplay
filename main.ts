@@ -8,9 +8,30 @@ enum OBBrightness{
     //% blockId="OFF" block="off"
     OFF = 0
 }
+class OBChar{
+    pixels:NumberFormat.UInt8LE[]
+}
+
+class OBText{
+    x: number
+    y: number
+    text:string
+    static char:OBChar[]=[]
+    constructor(str:string){
+        this.text=str
+        
+    }
+    writeString(screen:OBScreen,str:string){
+        for(let i=0;i<str.length;i++){
+        }
+    }
+    writeChar(screen:OBScreen,ch:number){
+
+    }
+}
 
 class OBImage{
-    x: number;
+    x: number
     y: number
     width: number;
     height: number;
@@ -34,27 +55,17 @@ class OBScreen extends OBImage {
     constructor(w: number, h: number){
         super(0, 0, w, h)
     }
-    setLine(id:number,row:number,line:number,doPlot:boolean){
-        let y=Math.trunc(id*5/this.width)
-        let x=id*5-y*this.width
-        for(let column=0;column<5;column++){
-            let b=(line&0x01)*255
-            this.data[x+column][y+row]=b
-            if(doPlot)led.plotBrightness(column, row, b)
-            line=line>>1
-        }
-    }
-    setLineGS(id:number,row:number,lineHI:number,lineLO:number,doPlot:boolean){
+    setLine(id:number,row:number,lineHI:number,lineLO:number,doPlot:boolean){
         let y=Math.trunc(id*5/this.width)
         let x=id*5-y*this.width
         for(let column=0;column<5;column++){
             let hi=(lineHI&0x01)*255
             let lo=(lineLO&0x01)*255
             let b=0
-            if(hi&&lo)b=255
+            if(hi&&lo)b=OBBrightness.HI
             else{
-                if(hi)b=63
-                if(lo)b=15
+                if(hi)b=OBBrightness.MID
+                if(lo)b=OBBrightness.LO
             }
             this.data[x+column][y+row]=b
             if(doPlot)led.plotBrightness(column, row, b)
@@ -80,63 +91,21 @@ namespace obDisplay{
             x = (id - y * (w / 5)) * 5
             screen=new OBScreen(w,h)
         }
-        if(message[0] == "D"){
-            if(screen)decode(parseInt(message[1]),message[2])
-        }
         if(message[0] == "S"){
-            if(screen)decodeGS(parseInt(message[1]),message[2])
+            if(screen)decode(parseInt(message[1]),message[2])
         }
     })
     function decode(displayID:number, str:string){
         let row=0
         while(row<5){
-            let line=parse32(str.charCodeAt(row))
-            screen.setLine(displayID,row++,line,(displayID==id))
-        }
-    }
-    function decodeGS(displayID:number, str:string){
-        let row=0
-        while(row<5){
             let lineHI=parse32(str.charCodeAt(2*row))
             let lineLO=parse32(str.charCodeAt(2*row+1))
-            screen.setLineGS(displayID,row++,lineHI,lineLO,(displayID==id))
+            screen.setLine(displayID,row++,lineHI,lineLO,(displayID==id))
         }
     }
     //% blockId="obDisplay_refresh"
     //% block="draws the actual data on each micro:bit of the display"
     export function refresh(){
-        if(isSlave)return
-        let w=screen.width
-        let h=screen.height
-        let maxID=Math.trunc(w*h/25)
-        for(let n=0;n<maxID;n++){
-            let data=""
-            y = Math.trunc(n * 5 / w) * 5
-            x = (n - y * w / 25) * 5
-            if(n==id){
-                for(let row=0;row<5;row++){
-                    for(let column=0;column<5;column++){
-                        led.plotBrightness(column,row,screen.data[x+column][y+row])
-                    }
-                }
-            }
-            else{
-                for(let row=0;row<5;row++){
-                    let line=0
-                    for(let column=0;column<5;column++){
-                        // black & white projection
-                        let pixel=(screen.data[x+column][y+row]>0)?1:0
-                        line+=pixel<<column
-                    }
-                    data+=to32(line)
-                }
-                radio.sendString("D:"+n.toString()+":"+data)
-            }
-        }
-    }
-    //% blockId="obDisplay_refreshGS"
-    //% block="draws the actual data on each micro:bit of the display"
-    export function refreshGS(){
         if(isSlave)return
         let w=screen.width
         let h=screen.height
@@ -170,7 +139,6 @@ namespace obDisplay{
                     }
                     data+=to32(line)
                 }
-//                serial.writeLine("S:"+n.toString()+":"+data)
                 radio.sendString("S:"+n.toString()+":"+data)
             }
         }
@@ -211,13 +179,13 @@ namespace obDisplay{
         screen.data[x][y]=brightness
     }
     //% blockId="obDisplay_drawImage"
-    //% block="draws $img on the display at $x $y starting point"
-    export function drawImage(x:number, y:number, img:OBImage){
+    //% block="draws $img on the display"
+    export function drawImage(img:OBImage){
         for(let i=0;i<img.width;i++){
             for(let j=0;j<img.height;j++){
-                if((x+i)>=screen.width)continue;
-                if((y+j)>=screen.height)continue;
-                screen.data[x+i][y+j]=img.data[i][j]
+                if((img.x+i)>=screen.width)continue;
+                if((img.y+j)>=screen.height)continue;
+                screen.data[img.x+i][img.y+j]=img.data[i][j]
             }
         }
     }
@@ -247,24 +215,3 @@ namespace obDisplay{
         return c0 - 87
     }
 }
-/*
-class Index2D{
-    x:number
-    y:number
-    w:number
-    h:number
-    constructor(offset:number,w:number,h:number){
-        this.y=Math.trunc(offset/w)
-        this.x=offset-this.y*w
-        this.w=w
-        this.h=h
-    }
-    increas():boolean{
-        this.x++;
-        if(this.x>=this.w){
-            this.x=0
-            this.y++
-        }
-        return (this.y>=this.h)
-    }
-}*/
