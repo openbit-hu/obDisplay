@@ -10,23 +10,50 @@ enum OBBrightness{
 }
 class OBChar{
     pixels:NumberFormat.UInt8LE[]
+    constructor(data:NumberFormat.UInt8LE[]){
+        this.pixels=data;
+    }
 }
 
 class OBText{
     x: number
     y: number
-    text:string
-    static char:OBChar[]=[]
+    text:OBChar[]
+    static char:OBChar[]
     constructor(str:string){
-        this.text=str
-        
+        OBText.char=[]
+        OBText.char.push(new OBChar([0,12,18,18,12])) //o
+        OBText.char.push(new OBChar([0,28,18,28,16])) //p
+        OBText.char.push(new OBChar([12,18,28,16,14])) //e
+        OBText.char.push(new OBChar([0,28,18,18,18])) //n
+        OBText.char.push(new OBChar([16,16,28,18,28])) //b
+        OBText.char.push(new OBChar([8,0,8,8,8])) //i
+        OBText.char.push(new OBChar([8,8,14,8,7])) //t
+        this.text=OBText.char
     }
-    writeString(screen:OBScreen,str:string){
-        for(let i=0;i<str.length;i++){
+    writeString(screen:OBScreen){
+        for(let i=0;i<this.text.length;i++){
+            let xx=this.x+i*6
+            for(let j=0;j<5;j++){
+                let line=this.text[i].pixels[j]
+                for(let k=0;k<5;k++){
+                    if((xx+k<0)||(xx+k>=screen.width))continue
+                    if((this.y+j<0)||(this.y+j>=screen.height))continue
+                    screen.data[xx+k][this.y+j]=(line&0x01)*255
+                    line=line>>1
+                }
+            }
         }
     }
-    writeChar(screen:OBScreen,ch:number){
-
+    animateString(screen:OBScreen){
+        this.x=screen.width
+        this.y=0
+        let l=this.text.length*6+screen.width
+        for(let i=0;i<l;i++){
+            this.x--
+            this.writeString(screen)
+            basic.pause(100)
+        }
     }
 }
 
@@ -188,6 +215,12 @@ namespace obDisplay{
                 screen.data[img.x+i][img.y+j]=img.data[i][j]
             }
         }
+    }
+    //% blockId="obDisplay_drawText"
+    //% block="draws $txt on the display"
+    export function drawText(txt:string){
+        let text=new OBText(txt)
+        text.animateString(screen)
     }
     function getID(){
         id = 0
