@@ -9,8 +9,8 @@ enum OBBrightness{
     OFF = 0
 }
 class OBChar{
-    pixels:NumberFormat.UInt8LE[]
-    constructor(data:NumberFormat.UInt8LE[]){
+    pixels:NumberFormat.UInt8BE[]
+    constructor(data:NumberFormat.UInt8BE[]){
         this.pixels=data;
     }
 }
@@ -22,13 +22,13 @@ class OBText{
     static char:OBChar[]
     constructor(str:string){
         OBText.char=[]
-        OBText.char.push(new OBChar([0,12,18,18,12])) //o
-        OBText.char.push(new OBChar([0,28,18,28,16])) //p
-        OBText.char.push(new OBChar([12,18,28,16,14])) //e
-        OBText.char.push(new OBChar([0,28,18,18,18])) //n
-        OBText.char.push(new OBChar([16,16,28,18,28])) //b
-        OBText.char.push(new OBChar([8,0,8,8,8])) //i
-        OBText.char.push(new OBChar([8,8,14,8,7])) //t
+        OBText.char.push(new OBChar([0,6,9,9,6])) //o
+        OBText.char.push(new OBChar([0,7,9,7,1])) //p
+        OBText.char.push(new OBChar([6,9,7,1,14])) //e
+        OBText.char.push(new OBChar([0,7,9,9,9])) //n
+        OBText.char.push(new OBChar([1,1,7,9,7])) //b
+        OBText.char.push(new OBChar([4,0,4,4,4])) //i
+        OBText.char.push(new OBChar([2,2,14,2,28])) //t
         this.text=OBText.char
     }
     writeString(screen:OBScreen){
@@ -37,11 +37,18 @@ class OBText{
             for(let j=0;j<5;j++){
                 let line=this.text[i].pixels[j]
                 for(let k=0;k<5;k++){
-                    if((xx+k<0)||(xx+k>=screen.width))continue
+                    if((xx+k<0)||(xx+k>=screen.width)){
+                        line=line>>1
+                        continue
+                    }
                     if((this.y+j<0)||(this.y+j>=screen.height))continue
-                    screen.data[xx+k][this.y+j]=(line&0x01)*255
+                    screen.data[xx+k][this.y+j]=(line&0x01)*OBBrightness.HI
                     line=line>>1
                 }
+                // space between characters
+                if((xx+5<0)||(xx+5>=screen.width))continue
+                if((this.y+j<0)||(this.y+j>=screen.height))continue
+                screen.data[xx+5][this.y+j]=OBBrightness.OFF
             }
         }
     }
@@ -52,6 +59,7 @@ class OBText{
         for(let i=0;i<l;i++){
             this.x--
             this.writeString(screen)
+            obDisplay.refresh()
             basic.pause(100)
         }
     }

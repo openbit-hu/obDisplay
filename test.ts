@@ -6,8 +6,7 @@ let running=false
 input.onButtonPressed(Button.A, function () {
     if(initialized)return
     initialized=true
-    obDisplay.initMaster(5, 10)    
-    serial.writeLine("Master")
+    obDisplay.initMaster(10, 5)
     running=true
 })
 
@@ -15,9 +14,20 @@ input.onButtonPressed(Button.B, function () {
     if(initialized)return
     initialized=true
     obDisplay.initSlave()
-    serial.writeLine("Slave")
 })
 
+
+basic.forever(function () {
+   while(true){
+        if(running){
+            obDisplay.drawText("")
+            return
+        }
+        basic.pause(100)
+   }
+ })
+
+/*
 basic.forever(function () {
     let x=0
     let dirX=1
@@ -45,3 +55,4 @@ basic.forever(function () {
         basic.pause(100)
     }
 })
+*/
