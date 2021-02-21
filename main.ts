@@ -22,12 +22,25 @@ class OBText{
     static char:OBChar[]
     constructor(str:string){
         OBText.char=[]
+        OBText.char.push(new OBChar([0,14,9,9,30])) //a
+        OBText.char.push(new OBChar([1,1,7,9,7])) //b
+        OBText.char.push(new OBChar([0,14,1,1,14])) //c
+        OBText.char.push(new OBChar([8,8,14,9,14])) //d
+        OBText.char.push(new OBChar([6,9,7,1,14])) //e
+        OBText.char.push(new OBChar([12,2,7,2,2])) //f
+        OBText.char.push(new OBChar([8,8,14,9,14])) //g-
+        OBText.char.push(new OBChar([8,8,14,9,14])) //h-
+        OBText.char.push(new OBChar([4,0,4,4,4])) //i
+        OBText.char.push(new OBChar([4,0,4,4,4])) //j-
+        OBText.char.push(new OBChar([4,0,4,4,4])) //k-
+        OBText.char.push(new OBChar([4,0,4,4,4])) //l-
+        OBText.char.push(new OBChar([4,0,4,4,4])) //m-
+        OBText.char.push(new OBChar([0,7,9,9,9])) //n
         OBText.char.push(new OBChar([0,6,9,9,6])) //o
         OBText.char.push(new OBChar([0,7,9,7,1])) //p
-        OBText.char.push(new OBChar([6,9,7,1,14])) //e
-        OBText.char.push(new OBChar([0,7,9,9,9])) //n
-        OBText.char.push(new OBChar([1,1,7,9,7])) //b
-        OBText.char.push(new OBChar([4,0,4,4,4])) //i
+        OBText.char.push(new OBChar([0,7,9,7,1])) //q-
+        OBText.char.push(new OBChar([0,7,9,7,1])) //r-
+        OBText.char.push(new OBChar([0,7,9,7,1])) //s-
         OBText.char.push(new OBChar([2,2,14,2,28])) //t
         this.text=OBText.char
     }

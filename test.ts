@@ -6,7 +6,7 @@ let running=false
 input.onButtonPressed(Button.A, function () {
     if(initialized)return
     initialized=true
-    obDisplay.initMaster(10, 5)
+    obDisplay.initMaster(5, 10)
     running=true
 })
 
@@ -29,8 +29,10 @@ basic.forever(function () {
             obDisplay.drawImage(imgL)
             obDisplay.refresh()
             basic.pause(2000)
-            imgL.rotateRight()
-            obDisplay.drawImage(imgL)
+            obDisplay.rotateImageRight(imgL)
+            obDisplay.refresh()
+            basic.pause(2000)
+            obDisplay.moveImage(1,6,imgL)
             obDisplay.refresh()
             running=false
 //            obDisplay.drawText("")
