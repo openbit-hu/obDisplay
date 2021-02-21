@@ -23,15 +23,16 @@ class OBText{
     constructor(str:string){
         OBText.char=[]
         OBText.char.push(new OBChar([6,9,9,9,6])) //0
-        OBText.char.push(new OBChar([4,6,4,4,12])) //1
+        OBText.char.push(new OBChar([4,6,4,4,14])) //1
         OBText.char.push(new OBChar([7,8,6,1,15])) //2
         OBText.char.push(new OBChar([15,8,4,9,6])) //3
         OBText.char.push(new OBChar([12,10,9,31,8])) //4
         OBText.char.push(new OBChar([31,1,15,16,15])) //5
-        OBText.char.push(new OBChar([8,4,12,17,12])) //6
+        OBText.char.push(new OBChar([8,4,14,17,14])) //6
         OBText.char.push(new OBChar([31,8,4,2,1])) //7
-        OBText.char.push(new OBChar([12,17,12,17,12])) //8
-        OBText.char.push(new OBChar([12,17,12,4,2])) //9
+        OBText.char.push(new OBChar([14,17,14,17,14])) //8
+        OBText.char.push(new OBChar([14,17,14,4,2])) //9
+        OBText.char.push(new OBChar([0,14,9,9,30])) //a
         OBText.char.push(new OBChar([1,1,7,9,7])) //b
         OBText.char.push(new OBChar([0,14,1,1,14])) //c
         OBText.char.push(new OBChar([8,8,14,9,14])) //d
