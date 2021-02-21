@@ -6,7 +6,7 @@ let running=false
 input.onButtonPressed(Button.A, function () {
     if(initialized)return
     initialized=true
-    obDisplay.initMaster(5, 10)
+    obDisplay.initMaster(10, 5)
     running=true
 })
 
@@ -20,7 +20,7 @@ input.onButtonPressed(Button.B, function () {
 basic.forever(function () {
     while(true){
         if(running){
-            let imgL=new OBImage(0,0,2,3)
+/*            let imgL=new OBImage(0,0,2,3)
             imgL.plot(0,0,OBBrightness.HI)
             imgL.plot(0,1,OBBrightness.MID)
             imgL.plot(0,2,OBBrightness.LO)
@@ -34,8 +34,8 @@ basic.forever(function () {
             basic.pause(2000)
             obDisplay.moveImage(1,6,imgL)
             obDisplay.refresh()
-            running=false
-//            obDisplay.drawText("")
+            running=false*/
+            obDisplay.drawText("")
             return
         }
         basic.pause(100)
