@@ -262,8 +262,8 @@ namespace obDisplay{
     export function drawImage(img:OBImage){
         for(let i=0;i<img.width;i++){
             for(let j=0;j<img.height;j++){
-                if((img.x+i)>=screen.width)continue;
-                if((img.y+j)>=screen.height)continue;
+                if((img.x+i<0)||(img.x+i>=screen.width))continue;
+                if((img.y+j<0)||(img.y+j>=screen.height))continue;
                 screen.data[img.x+i][img.y+j]=img.data[i][j]
             }
         }
