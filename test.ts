@@ -18,9 +18,22 @@ input.onButtonPressed(Button.B, function () {
 
 
 basic.forever(function () {
-   while(true){
+    while(true){
         if(running){
-            obDisplay.drawText("")
+            let imgL=new OBImage(0,0,2,3)
+            imgL.plot(0,0,OBBrightness.HI)
+            imgL.plot(0,1,OBBrightness.MID)
+            imgL.plot(0,2,OBBrightness.LO)
+            imgL.plot(1,2,OBBrightness.MID)
+            imgL.plot(1,1,OBBrightness.HI)
+            obDisplay.drawImage(imgL)
+            obDisplay.refresh()
+            basic.pause(2000)
+            imgL.rotateRight()
+            obDisplay.drawImage(imgL)
+            obDisplay.refresh()
+            running=false
+//            obDisplay.drawText("")
             return
         }
         basic.pause(100)

@@ -84,6 +84,22 @@ class OBImage{
             }
         }
     }
+    plot(x:number, y:number, brightness:OBBrightness){
+        this.data[x][y]=brightness
+    }
+    rotateRight(){
+        let dataBuffer:number[][]=[]
+        for(let i=0;i<this.height;i++){
+            dataBuffer[i]=[]
+            for(let j=0;j<this.width;j++){
+                dataBuffer[i][j]=this.data[j][this.height-1-i]
+            }
+        }
+        let b=this.height
+        this.height=this.width
+        this.width=b
+        this.data=dataBuffer
+    }
 }
 
 class OBScreen extends OBImage {
@@ -223,6 +239,32 @@ namespace obDisplay{
                 screen.data[img.x+i][img.y+j]=img.data[i][j]
             }
         }
+    }
+    //% blockId="obDisplay_eraseImageBkg"
+    //% block="clears $img from the display"
+    export function eraseImageBkg(img:OBImage){
+        for(let i=0;i<img.width;i++){
+            for(let j=0;j<img.height;j++){
+                if((img.x+i)>=screen.width)continue;
+                if((img.y+j)>=screen.height)continue;
+                screen.data[img.x+i][img.y+j]=OBBrightness.OFF
+            }
+        }
+    }
+    //% blockId="obDisplay_rotateImageRight"
+    //% block="rotates the $img right on the display"
+    export function rotateImageRight(img:OBImage){
+        eraseImageBkg(img)
+        img.rotateRight()
+        drawImage(img)
+    }
+    //% blockId="obDisplay_moveImage"
+    //% block="moves the $img to ($x,$y) position on the display"
+    export function moveImage(x:number,y:number,img:OBImage){
+        eraseImageBkg(img)
+        img.x=x
+        img.y=y
+        drawImage(img)
     }
     //% blockId="obDisplay_drawText"
     //% block="draws $txt on the display"
