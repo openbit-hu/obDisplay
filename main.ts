@@ -15,12 +15,24 @@ class OBChar{
     }
 }
 
-class OBText{
+class OBDisplayElement{
     x: number
     y: number
+    width: number;
+    height: number;
+    constructor(x:number,y:number,width:number,height:number){
+        this.x=x
+        this.y=y
+        this.width=width
+        this.height=height
+    }
+}
+
+class OBText extends OBDisplayElement{
     text:OBChar[]
     static char:OBChar[]
     constructor(str:string){
+        super(0,0,str.length*5,5)
         OBText.char=[]
         OBText.char.push(new OBChar([6,9,9,9,6])) //0
         OBText.char.push(new OBChar([4,6,4,4,14])) //1
@@ -93,17 +105,10 @@ class OBText{
     }
 }
 
-class OBImage{
-    x: number
-    y: number
-    width: number;
-    height: number;
+class OBImage extends OBDisplayElement{
     data: number[][];
     constructor(x: number, y: number, w: number, h: number){
-        this.x = x;
-        this.y = y;
-        this.width = w;
-        this.height = h;
+        super(x,y,w,h)
         this.data=[];
         for(let i=0;i<w;i++){
             this.data[i]=[]
